@@ -1,0 +1,4 @@
+.env
+__pycache__/
+*.pyc
+Gold_Forward_Test_Report.xlsx
