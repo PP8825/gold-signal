@@ -1,0 +1,13 @@
+[
+  {
+    "timestamp": "2026-04-17T22:10:56.224005+07:00",
+    "action": "BUY",
+    "price": 73427.2192483401,
+    "units": 1.361893,
+    "value": 100000.0,
+    "cash_before": 100000.0,
+    "cash_after": 0.0,
+    "gold_before": 0.0,
+    "gold_after": 1.361893
+  }
+]

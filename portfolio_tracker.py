@@ -192,8 +192,6 @@ def trade_to_line_text(trade: dict, portfolio: dict, current_price: float) -> st
         f"• มูลค่าพอร์ต: {val:,.2f} บาท",
         f"• กำไร/ขาดทุน: {pnl:+,.2f} บาท ({pnl_pct:+.2f}%)",
         f"• จำนวนรอบซื้อขาย: {len(trades)}",
-        f"",
-        f"⚠️ ทดสอบจำลอง — ไม่ใช่เงินจริง",
     ]
     return "\n".join(lines)
 

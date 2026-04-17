@@ -28,6 +28,11 @@ def load_data():
     pf_path = BASE_DIR / "portfolio_state.json"
     tl_path = BASE_DIR / "trade_log.json"
 
+    if not pf_path.exists():
+        raise FileNotFoundError(
+            "ยังไม่มีข้อมูลพอร์ต — ต้องรัน portfolio_tracker.py อย่างน้อย 1 ครั้งก่อนสร้างรายงาน\n"
+            "Run: uv run --python 3.12 --with pandas --with numpy --with requests --with yfinance --with openpyxl portfolio_tracker.py"
+        )
     with open(pf_path) as f:
         portfolio = json.load(f)
     trades = []
