@@ -41,7 +41,7 @@ PORTFOLIO_CONFIG = {
     "TRADE_LOG": str(
         Path(__file__).parent / "trade_log.json"
     ),
-    "TEST_START": None,  # auto-set on first run
+    "TEST_START": "2026-04-18T09:00:00+07:00",  # Start: 18 April 2026, 9AM Bangkok
     "TEST_DURATION_DAYS": 30,
 }
 
@@ -57,14 +57,15 @@ def load_portfolio() -> dict:
         with open(p) as f:
             return json.load(f)
     # First run — initialise
-    now = datetime.now(BKK_TZ).isoformat()
+    start = PORTFOLIO_CONFIG["TEST_START"]
+    start_dt = datetime.fromisoformat(start)
     state = {
         "initial_cash": PORTFOLIO_CONFIG["INITIAL_CASH"],
         "cash": PORTFOLIO_CONFIG["INITIAL_CASH"],
         "gold_units": 0.0,       # baht-weight
         "position": "CASH",      # "CASH" or "GOLD"
-        "test_start": now,
-        "test_end": (datetime.now(BKK_TZ) + timedelta(days=PORTFOLIO_CONFIG["TEST_DURATION_DAYS"])).isoformat(),
+        "test_start": start,
+        "test_end": (start_dt + timedelta(days=PORTFOLIO_CONFIG["TEST_DURATION_DAYS"])).isoformat(),
         "last_price": 0.0,
         "trades": [],
     }
@@ -203,11 +204,21 @@ def run_forward_test(force: bool = False):
     portfolio = load_portfolio()
     trades = load_trade_log()
 
+    now = datetime.now(BKK_TZ)
+
+    # Check if test has started yet
+    test_start = datetime.fromisoformat(portfolio["test_start"])
+    if test_start.tzinfo is None:
+        test_start = test_start.replace(tzinfo=BKK_TZ)
+    if now < test_start:
+        log.info("Forward test hasn't started yet (starts %s). Waiting...",
+                 portfolio["test_start"][:10])
+        return
+
     # Check if test period expired
     test_end = datetime.fromisoformat(portfolio["test_end"])
     if test_end.tzinfo is None:
         test_end = test_end.replace(tzinfo=BKK_TZ)
-    now = datetime.now(BKK_TZ)
 
     if now > test_end:
         log.info("Forward test period ended on %s. Run --report to generate Excel.",
