@@ -35,7 +35,7 @@ BKK_TZ = timezone(timedelta(hours=7))
 
 PORTFOLIO_CONFIG = {
     "INITIAL_CASH": 500_000.0,
-    "TRADE_SIZE": 100_000.0,          # max THB per trade
+    "TRADE_SIZE_UNITS": 1.0,          # buy/sell 1 baht-weight of gold per trade
     "PORTFOLIO_FILE": str(
         Path(__file__).parent / "portfolio_state.json"
     ),
@@ -98,21 +98,23 @@ def save_trade_log(trades: list):
 def execute_trade(portfolio: dict, action: str, price: float) -> Optional[dict]:
     """
     Execute a paper trade with realistic position sizing.
-    - BUY: spend min(TRADE_SIZE, available_cash) on gold
-    - SELL: sell min(TRADE_SIZE worth, available gold)
+    - BUY: buy 1 baht-weight of gold (if enough cash)
+    - SELL: sell 1 baht-weight of gold (if enough gold)
     Returns trade record or None if no trade possible.
     """
     now = datetime.now(BKK_TZ)
-    trade_size = PORTFOLIO_CONFIG["TRADE_SIZE"]
+    trade_units = PORTFOLIO_CONFIG["TRADE_SIZE_UNITS"]  # 1 baht-weight
 
     if action == "BUY":
+        cost = trade_units * price
         available = portfolio["cash"]
-        if available < 1:  # less than 1 baht = nothing to buy
-            log.info("BUY signal but no cash left (%.2f THB). Skipping.", available)
+        if available < price * 0.1:  # can't even buy 0.1 baht-weight
+            log.info("BUY signal but not enough cash (%.2f THB). Skipping.", available)
             return None
 
-        spend = min(trade_size, available)
-        units_bought = spend / price
+        # Buy 1 baht-weight, or whatever cash allows if less than 1
+        units_bought = min(trade_units, available / price)
+        spend = units_bought * price
 
         trade = {
             "timestamp": now.isoformat(),
@@ -131,14 +133,13 @@ def execute_trade(portfolio: dict, action: str, price: float) -> Optional[dict]:
         return trade
 
     elif action == "SELL":
-        if portfolio["gold_units"] < 0.0001:  # basically no gold
+        if portfolio["gold_units"] < 0.01:  # basically no gold
             log.info("SELL signal but no gold to sell (%.6f). Skipping.",
                      portfolio["gold_units"])
             return None
 
-        # Sell up to TRADE_SIZE worth of gold
-        max_units = trade_size / price
-        units_sold = min(max_units, portfolio["gold_units"])
+        # Sell 1 baht-weight, or whatever is left if less than 1
+        units_sold = min(trade_units, portfolio["gold_units"])
         cash_received = units_sold * price
 
         trade = {
