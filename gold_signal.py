@@ -262,8 +262,7 @@ class Signal:
             f"• MA{CONFIG['MA_FAST']}/MA{CONFIG['MA_SLOW']}: "
             f"{self.ma_fast:,.0f} / {self.ma_slow:,.0f} "
             f"→ {vote_th[self.votes['ma']]}\n\n"
-            f"เหตุผล: {'; '.join(reasons_th) if reasons_th else 'ไม่มีสัญญาณชัดเจน'}\n\n"
-            f"⚠️ ไม่ใช่คำแนะนำการลงทุน"
+            f"เหตุผล: {'; '.join(reasons_th) if reasons_th else 'ไม่มีสัญญาณชัดเจน'}"
         )
 
 
