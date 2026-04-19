@@ -59,23 +59,15 @@ jobs:
           LINE_TO: ${{ secrets.LINE_TO }}
         run: python portfolio_tracker.py
 
-      - name: Debug state files
-        run: |
-          echo "=== State files ==="
-          ls -la portfolio_state.json trade_log.json .thai_gold_signal_state.json .thai_gold_history.csv 2>&1 || true
-          echo "=== portfolio_state.json ==="
-          cat portfolio_state.json 2>/dev/null || echo "NOT FOUND"
-          echo "=== trade_log.json ==="
-          cat trade_log.json 2>/dev/null || echo "NOT FOUND"
-
       - name: Commit state files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git status
-          git add -f portfolio_state.json trade_log.json .thai_gold_signal_state.json .thai_gold_history.csv 2>/dev/null || true
-          git status
-          git diff --cached --quiet && echo "Nothing to commit" || (git commit -m "Update signal state [skip ci]" && git push)
+          for f in portfolio_state.json trade_log.json .thai_gold_signal_state.json .thai_gold_history.csv; do
+            [ -f "$f" ] && git add -f "$f" && echo "Added $f" || echo "Skipped $f (not found)"
+          done
+          git diff --cached --stat
+          git commit -m "Update signal state [skip ci]" && git push || echo "Nothing new to commit"
 
   # ── Monthly report (sends summary to LINE + saves Excel) ──────
   monthly-report:
@@ -111,6 +103,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -f Gold_Forward_Test_Report.xlsx portfolio_state.json trade_log.json .thai_gold_history.csv 2>/dev/null || true
-          git diff --cached --quiet || git commit -m "Monthly report generated [skip ci]"
-          git push || true
+          for f in Gold_Forward_Test_Report.xlsx portfolio_state.json trade_log.json .thai_gold_signal_state.json .thai_gold_history.csv; do
+            [ -f "$f" ] && git add -f "$f" && echo "Added $f" || echo "Skipped $f (not found)"
+          done
+          git commit -m "Monthly report generated [skip ci]" && git push || echo "Nothing new to commit"
