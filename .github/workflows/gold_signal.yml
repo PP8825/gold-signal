@@ -1,5 +1,8 @@
 name: Gold Signal Alert
 
+permissions:
+  contents: write
+
 on:
   schedule:
     # Signal check: every 4 hours (UTC)
