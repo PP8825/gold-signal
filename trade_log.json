@@ -20,5 +20,16 @@
     "cash_after": 352807.48,
     "gold_before": 1.0,
     "gold_after": 2.0
+  },
+  {
+    "timestamp": "2026-04-20T00:55:53.743058+07:00",
+    "action": "BUY",
+    "price": 73596.26,
+    "units": 1.0,
+    "value": 73596.26,
+    "cash_before": 352807.48,
+    "cash_after": 279211.23,
+    "gold_before": 2.0,
+    "gold_after": 3.0
   }
 ]
