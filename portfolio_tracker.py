@@ -43,7 +43,7 @@ PORTFOLIO_CONFIG = {
         Path(__file__).parent / "trade_log.json"
     ),
     "TEST_START": "2026-04-18T09:00:00+07:00",
-    "TEST_DURATION_DAYS": 30,
+    "TEST_DURATION_DAYS": 27,  # April 18 → May 15
 }
 
 log = logging.getLogger("portfolio")

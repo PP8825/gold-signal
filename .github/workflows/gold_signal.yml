@@ -6,7 +6,7 @@ on:
     - cron: "0 */4 * * *"
     # Monthly report: 18th May 2026 = day 30, then 1st of every month
     - cron: "0 3 1 * *"
-    - cron: "0 3 18 5 *"
+    - cron: "0 3 15 5 *"
   workflow_dispatch:
     inputs:
       job:
