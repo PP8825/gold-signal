@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gold Portfolio Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    min-height: 100vh;
+  }
+  .header {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-bottom: 1px solid #334155;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header h1 {
+    font-size: 1.5rem;
+    color: #fbbf24;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .header .period {
+    color: #94a3b8;
+    font-size: 0.85rem;
+  }
+  .updated {
+    color: #64748b;
+    font-size: 0.8rem;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .card .label {
+    color: #94a3b8;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .card .value {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  .card .sub {
+    color: #64748b;
+    font-size: 0.8rem;
+    margin-top: 4px;
+  }
+  .green { color: #22c55e; }
+  .red { color: #ef4444; }
+  .gold { color: #fbbf24; }
+  .chart-container {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .chart-container h2 {
+    font-size: 1rem;
+    color: #cbd5e1;
+    margin-bottom: 16px;
+  }
+  .chart-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 768px) {
+    .chart-row { grid-template-columns: 1fr; }
+    .cards { grid-template-columns: repeat(2, 1fr); }
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  th {
+    background: #334155;
+    color: #cbd5e1;
+    padding: 10px 12px;
+    text-align: center;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+  }
+  td {
+    padding: 8px 12px;
+    text-align: center;
+    border-bottom: 1px solid #1e293b;
+  }
+  tr:nth-child(even) { background: #1e293b; }
+  tr:nth-child(odd) { background: #0f172a; }
+  .buy-row { background: rgba(34, 197, 94, 0.08) !important; }
+  .sell-row { background: rgba(239, 68, 68, 0.08) !important; }
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.75rem;
+  }
+  .badge-buy { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+  .badge-sell { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+  .table-scroll {
+    max-height: 400px;
+    overflow-y: auto;
+    border-radius: 8px;
+    border: 1px solid #334155;
+  }
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+  }
+  .tab {
+    padding: 8px 20px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 8px 8px 0 0;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: #334155;
+    color: #fbbf24;
+    border-bottom-color: #334155;
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #1e293b;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-label { color: #94a3b8; }
+  .stat-value { font-weight: 600; }
+  .allocation-bar {
+    display: flex;
+    height: 28px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .alloc-cash {
+    background: #3b82f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    transition: width 0.5s;
+  }
+  .alloc-gold {
+    background: #fbbf24;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    transition: width 0.5s;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>📊 Gold Portfolio Dashboard</h1>
+    <div class="period">Forward Test: 2026-04-18 → 2026-05-15</div>
+  </div>
+  <div class="updated">อัปเดตล่าสุด: 2026-04-22 16:48 ICT</div>
+</div>
+
+<div class="container">
+
+  <!-- Summary Cards -->
+  <div class="cards">
+    <div class="card">
+      <div class="label">มูลค่าพอร์ต</div>
+      <div class="value gold">496,720.77</div>
+      <div class="sub">เริ่มต้น 500,000 บาท</div>
+    </div>
+    <div class="card">
+      <div class="label">กำไร/ขาดทุน</div>
+      <div class="value" style="color:#ef4444">-3,279.23</div>
+      <div class="sub" style="color:#ef4444">-0.66%</div>
+    </div>
+    <div class="card">
+      <div class="label">ราคาทองปัจจุบัน</div>
+      <div class="value">72,597.48</div>
+      <div class="sub">บาท/บาททอง</div>
+    </div>
+    <div class="card">
+      <div class="label">ต้นทุนเฉลี่ย</div>
+      <div class="value">0.00</div>
+      <div class="sub">ไม่มีทองคำ</div>
+    </div>
+  </div>
+
+  <!-- Allocation -->
+  <div class="card" style="margin-bottom:24px">
+    <div class="label">สัดส่วนพอร์ต</div>
+    <div style="display:flex;justify-content:space-between;margin-top:8px">
+      <span>เงินสด: 496,720.77 บาท</span>
+      <span class="gold">ทองคำ: 0.00 บาท</span>
+    </div>
+    <div class="allocation-bar">
+      <div class="alloc-cash" style="width:100%">
+        เงินสด 100%
+      </div>
+      <div class="alloc-gold" style="width:0%">
+        
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))">
+    <div class="card">
+      <div class="label">สถิติการเทรด</div>
+      <div class="stat-row"><span class="stat-label">รายการทั้งหมด</span><span class="stat-value">8</span></div>
+      <div class="stat-row"><span class="stat-label">คู่ BUY-SELL</span><span class="stat-value">4</span></div>
+      <div class="stat-row"><span class="stat-label">ชนะ / แพ้</span><span class="stat-value"><span class="green">0</span> / <span class="red">4</span></span></div>
+      <div class="stat-row"><span class="stat-label">อัตราชนะ</span><span class="stat-value">0%</span></div>
+    </div>
+    <div class="card">
+      <div class="label">กำไร/ขาดทุนจากการเทรด</div>
+      <div class="stat-row"><span class="stat-label">กำไรรวม</span><span class="stat-value green">+0.00</span></div>
+      <div class="stat-row"><span class="stat-label">ขาดทุนรวม</span><span class="stat-value red">-3,279.24</span></div>
+      <div class="stat-row"><span class="stat-label">สุทธิ</span><span class="stat-value" style="color:#ef4444">-3,279.24</span></div>
+      <div class="stat-row"><span class="stat-label">กฎ</span><span class="stat-value" style="font-size:0.75rem;color:#94a3b8">ไม่ขายต่ำกว่าต้นทุน</span></div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="chart-row">
+    <div class="chart-container">
+      <h2>📈 มูลค่าพอร์ตรายวัน</h2>
+      <canvas id="valueChart"></canvas>
+    </div>
+    <div class="chart-container">
+      <h2>📊 ผลตอบแทนสะสม (%)</h2>
+      <canvas id="returnChart"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-container">
+    <h2>🪙 ราคาทองคำ</h2>
+    <canvas id="priceChart"></canvas>
+  </div>
+
+  <!-- Tables -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('trades')">รายการซื้อขาย (8)</div>
+    <div class="tab" onclick="switchTab('daily')">ผลรายวัน (1)</div>
+  </div>
+
+  <div id="trades-tab" class="tab-content active">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>วัน/เวลา</th><th>รายการ</th><th>ราคา</th>
+            <th>จำนวน</th><th>มูลค่า</th><th>เงินสดหลัง</th><th>ทองหลัง</th>
+          </tr>
+        </thead>
+        <tbody id="trade-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="daily-tab" class="tab-content">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>วัน</th><th>วันที่</th><th>ราคาทอง</th><th>เงินสด</th>
+            <th>ทองคำ</th><th>มูลค่าพอร์ต</th><th>กำไร/ขาดทุน</th><th>%</th>
+            <th>ซื้อ</th><th>ขาย</th>
+          </tr>
+        </thead>
+        <tbody id="daily-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const trades = [{"timestamp": "2026-04-18T21:40:10.827007+07:00", "action": "BUY", "price": 73596.26, "units": 1.0, "value": 73596.26, "cash_before": 500000.0, "cash_after": 426403.74, "gold_before": 0.0, "gold_after": 1.0}, {"timestamp": "2026-04-19T23:58:02.622906+07:00", "action": "BUY", "price": 73596.26, "units": 1.0, "value": 73596.26, "cash_before": 426403.74, "cash_after": 352807.48, "gold_before": 1.0, "gold_after": 2.0}, {"timestamp": "2026-04-20T00:55:53.743058+07:00", "action": "BUY", "price": 73596.26, "units": 1.0, "value": 73596.26, "cash_before": 352807.48, "cash_after": 279211.23, "gold_before": 2.0, "gold_after": 3.0}, {"timestamp": "2026-04-20T04:52:58.229533+07:00", "action": "BUY", "price": 73596.26, "units": 1.0, "value": 73596.26, "cash_before": 279211.23, "cash_after": 205614.97, "gold_before": 3.0, "gold_after": 4.0}, {"timestamp": "2026-04-20T18:58:31.569528+07:00", "action": "SELL", "price": 72930.21, "units": 1.0, "value": 72930.21, "cash_before": 205614.97, "cash_after": 278545.17, "gold_before": 4.0, "gold_after": 3.0}, {"timestamp": "2026-04-20T22:59:59.830343+07:00", "action": "SELL", "price": 72949.62, "units": 1.0, "value": 72949.62, "cash_before": 278545.17, "cash_after": 351494.79, "gold_before": 3.0, "gold_after": 2.0}, {"timestamp": "2026-04-21T18:44:19.988854+07:00", "action": "SELL", "price": 72793.79, "units": 1.0, "value": 72793.79, "cash_before": 351494.79, "cash_after": 424288.59, "gold_before": 2.0, "gold_after": 1.0}, {"timestamp": "2026-04-21T23:00:24.409247+07:00", "action": "SELL", "price": 72432.18, "units": 1.0, "value": 72432.18, "cash_before": 424288.59, "cash_after": 496720.77, "gold_before": 1.0, "gold_after": 0.0}];
+const daily = [{"date": "2026-04-22", "price": 72663.59, "cash": 496720.77, "gold_units": 0.0, "gold_value": 0.0, "port_value": 496720.77, "pnl": -3279.23, "pnl_pct": -0.66, "total_trades": 8, "signal": "\u0e0b\u0e37\u0e49\u0e2d", "buys_today": 0, "sells_today": 0}];
+
+const fmt = (n) => n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+// Trade table
+const tbody = document.getElementById('trade-body');
+trades.forEach((t, i) => {
+  const cls = t.action === 'BUY' ? 'buy-row' : 'sell-row';
+  const badge = t.action === 'BUY'
+    ? '<span class="badge badge-buy">ซื้อ</span>'
+    : '<span class="badge badge-sell">ขาย</span>';
+  tbody.innerHTML += `<tr class="${cls}">
+    <td>${i+1}</td>
+    <td>${t.timestamp.slice(0,16).replace('T',' ')}</td>
+    <td>${badge}</td>
+    <td>${fmt(t.price)}</td>
+    <td>${t.units.toFixed(4)}</td>
+    <td>${fmt(t.value)}</td>
+    <td>${fmt(t.cash_after)}</td>
+    <td>${t.gold_after.toFixed(4)}</td>
+  </tr>`;
+});
+
+// Daily table
+const dbody = document.getElementById('daily-body');
+daily.forEach((d, i) => {
+  const pcolor = d.pnl >= 0 ? '#22c55e' : '#ef4444';
+  dbody.innerHTML += `<tr>
+    <td>${i+1}</td>
+    <td>${d.date}</td>
+    <td>${fmt(d.price)}</td>
+    <td>${fmt(d.cash)}</td>
+    <td>${d.gold_units.toFixed(4)}</td>
+    <td>${fmt(d.port_value)}</td>
+    <td style="color:${pcolor}">${d.pnl >= 0 ? '+' : ''}${fmt(d.pnl)}</td>
+    <td style="color:${pcolor}">${d.pnl_pct >= 0 ? '+' : ''}${d.pnl_pct.toFixed(2)}%</td>
+    <td>${d.buys_today || '-'}</td>
+    <td>${d.sells_today || '-'}</td>
+  </tr>`;
+});
+
+// Tab switching
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById(name + '-tab').classList.add('active');
+  event.target.classList.add('active');
+}
+
+// Charts
+const chartDefaults = {
+  color: '#94a3b8',
+  borderColor: '#334155',
+};
+
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.borderColor = '#334155';
+
+if (daily.length >= 1) {
+  const labels = daily.map(d => d.date.slice(5));
+
+  new Chart(document.getElementById('valueChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'มูลค่าพอร์ต (บาท)',
+        data: daily.map(d => d.port_value),
+        borderColor: '#fbbf24',
+        backgroundColor: 'rgba(251, 191, 36, 0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+        pointBackgroundColor: '#fbbf24',
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => fmt(ctx.raw) + ' บาท' } }
+      },
+      scales: {
+        y: {
+          ticks: { callback: v => (v/1000).toFixed(0) + 'k' }
+        }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('returnChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'ผลตอบแทน (%)',
+        data: daily.map(d => d.pnl_pct),
+        borderColor: daily[daily.length-1].pnl_pct >= 0 ? '#22c55e' : '#ef4444',
+        backgroundColor: daily[daily.length-1].pnl_pct >= 0
+          ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ctx.raw.toFixed(2) + '%' } }
+      },
+      scales: {
+        y: { ticks: { callback: v => v.toFixed(1) + '%' } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('priceChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'ราคาทอง (บาท/บาททอง)',
+        data: daily.map(d => d.price),
+        borderColor: '#f59e0b',
+        tension: 0.3,
+        pointRadius: 4,
+        pointBackgroundColor: '#f59e0b',
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => fmt(ctx.raw) + ' บาท' } }
+      },
+      scales: {
+        y: { ticks: { callback: v => (v/1000).toFixed(1) + 'k' } }
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>

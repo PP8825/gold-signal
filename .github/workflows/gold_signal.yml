@@ -62,11 +62,14 @@ jobs:
           LINE_TO: ${{ secrets.LINE_TO }}
         run: python portfolio_tracker.py
 
+      - name: Update dashboard
+        run: python generate_dashboard.py
+
       - name: Commit state files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          for f in portfolio_state.json trade_log.json .thai_gold_signal_state.json .thai_gold_history.csv daily_history.json; do
+          for f in portfolio_state.json trade_log.json .thai_gold_signal_state.json .thai_gold_history.csv daily_history.json docs/index.html; do
             [ -f "$f" ] && git add -f "$f" && echo "Added $f" || echo "Skipped $f (not found)"
           done
           git diff --cached --stat
@@ -101,11 +104,14 @@ jobs:
           LINE_TO: ${{ secrets.LINE_TO }}
         run: python daily_snapshot.py
 
+      - name: Update dashboard
+        run: python generate_dashboard.py
+
       - name: Commit snapshot data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          for f in daily_history.json portfolio_state.json; do
+          for f in daily_history.json portfolio_state.json docs/index.html; do
             [ -f "$f" ] && git add -f "$f" && echo "Added $f" || echo "Skipped $f (not found)"
           done
           git diff --cached --stat
