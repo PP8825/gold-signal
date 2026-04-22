@@ -127,8 +127,17 @@ def execute_trade(portfolio: dict, action: str, price: float) -> Optional[dict]:
             "gold_before": round(portfolio["gold_units"], 6),
             "gold_after": round(portfolio["gold_units"] + units_bought, 6),
         }
+        # Update average cost basis
+        old_gold = portfolio["gold_units"]
+        old_avg = portfolio.get("avg_cost", 0.0)
+        new_gold = old_gold + units_bought
+        if new_gold > 0:
+            portfolio["avg_cost"] = (old_avg * old_gold + spend) / new_gold
+        else:
+            portfolio["avg_cost"] = price
+
         portfolio["cash"] -= spend
-        portfolio["gold_units"] += units_bought
+        portfolio["gold_units"] = new_gold
         portfolio["last_price"] = price
         return trade
 
@@ -136,6 +145,13 @@ def execute_trade(portfolio: dict, action: str, price: float) -> Optional[dict]:
         if portfolio["gold_units"] < 0.01:  # basically no gold
             log.info("SELL signal but no gold to sell (%.6f). Skipping.",
                      portfolio["gold_units"])
+            return None
+
+        # Never sell below average buy price — hold and wait for profit
+        avg_cost = portfolio.get("avg_cost", 0.0)
+        if avg_cost > 0 and price < avg_cost:
+            log.info("SELL signal but price %.2f < avg cost %.2f. Holding for profit.",
+                     price, avg_cost)
             return None
 
         # Sell 1 baht-weight, or whatever is left if less than 1
@@ -156,6 +172,9 @@ def execute_trade(portfolio: dict, action: str, price: float) -> Optional[dict]:
         portfolio["cash"] += cash_received
         portfolio["gold_units"] -= units_sold
         portfolio["last_price"] = price
+        # Reset avg_cost if all gold sold
+        if portfolio["gold_units"] < 0.01:
+            portfolio["avg_cost"] = 0.0
         return trade
 
     return None
@@ -205,22 +224,33 @@ def trade_to_line_text(trade: dict, portfolio: dict, current_price: float) -> st
     g_pct = gold_pct(portfolio, current_price)
     c_pct = 100 - g_pct
 
+    avg_cost = portfolio.get("avg_cost", 0.0)
+    profit_line = ""
+    if trade["action"] == "SELL" and avg_cost > 0:
+        profit_per_unit = trade["price"] - avg_cost
+        profit_total = profit_per_unit * trade["units"]
+        profit_line = f"กำไรต่อบาททอง: {profit_per_unit:+,.2f} บาท (รวม {profit_total:+,.2f} บาท)"
+
     lines = [
         f"{emoji} ทำรายการ: {action_th}ทองคำ",
         f"──────────────",
         f"ราคา: {trade['price']:,.2f} บาท/บาททอง",
         f"จำนวน: {trade['units']:.4f} บาททอง",
         f"มูลค่า: {trade['value']:,.2f} บาท",
+        f"ต้นทุนเฉลี่ย: {avg_cost:,.2f} บาท/บาททอง" if avg_cost > 0 and trade["action"] == "BUY" else "",
         f"เวลา: {trade['timestamp'][:16]}",
+        profit_line if profit_line else "",
         f"",
         f"พอร์ตหลังทำรายการ:",
         f"• เงินสด: {portfolio['cash']:,.2f} บาท ({c_pct:.0f}%)",
         f"• ทองคำ: {portfolio['gold_units']:.4f} บาททอง ({g_pct:.0f}%)",
         f"• มูลค่าพอร์ต: {val:,.2f} บาท",
         f"• กำไร/ขาดทุน: {pnl:+,.2f} บาท ({pnl_pct:+.2f}%)",
+        f"• ต้นทุนเฉลี่ย: {avg_cost:,.2f} บาท/บาททอง" if avg_cost > 0 else "",
         f"• จำนวนรายการ: {len(trades)}",
     ]
-    return "\n".join(lines)
+    # Filter out empty strings from conditional lines, but keep f"" separators
+    return "\n".join(l for l in lines if l is not None)
 
 
 # ---------------------------------------------------------------------------
