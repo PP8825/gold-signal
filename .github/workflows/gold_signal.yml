@@ -7,6 +7,8 @@ on:
   schedule:
     # Signal check: every 4 hours (UTC)
     - cron: "0 */4 * * *"
+    # Daily snapshot: 2:00 UTC = 09:00 Bangkok
+    - cron: "0 2 * * *"
     # Monthly report: 18th May 2026 = day 30, then 1st of every month
     - cron: "0 3 1 * *"
     - cron: "0 3 15 5 *"
@@ -19,6 +21,7 @@ on:
         type: choice
         options:
           - signal
+          - daily-snapshot
           - monthly
 
 jobs:
@@ -63,11 +66,50 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          for f in portfolio_state.json trade_log.json .thai_gold_signal_state.json .thai_gold_history.csv; do
+          for f in portfolio_state.json trade_log.json .thai_gold_signal_state.json .thai_gold_history.csv daily_history.json; do
             [ -f "$f" ] && git add -f "$f" && echo "Added $f" || echo "Skipped $f (not found)"
           done
           git diff --cached --stat
           git commit -m "Update signal state [skip ci]" && git push || echo "Nothing new to commit"
+
+  # ── Daily snapshot (09:00 Bangkok = 02:00 UTC every day) ─────
+  daily-snapshot:
+    if: >-
+      github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'daily-snapshot'
+      || github.event.schedule == '0 2 * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pandas numpy requests yfinance openpyxl
+
+      - name: Pull latest state
+        run: git pull --rebase || true
+
+      - name: Run daily snapshot
+        env:
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_TO: ${{ secrets.LINE_TO }}
+        run: python daily_snapshot.py
+
+      - name: Commit snapshot data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          for f in daily_history.json portfolio_state.json; do
+            [ -f "$f" ] && git add -f "$f" && echo "Added $f" || echo "Skipped $f (not found)"
+          done
+          git diff --cached --stat
+          git commit -m "Daily snapshot [skip ci]" && git push || echo "Nothing new to commit"
 
   # ── Monthly report (sends summary to LINE + saves Excel) ──────
   monthly-report:
@@ -103,7 +145,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          for f in Gold_Forward_Test_Report.xlsx portfolio_state.json trade_log.json .thai_gold_signal_state.json .thai_gold_history.csv; do
+          for f in Gold_Forward_Test_Report.xlsx portfolio_state.json trade_log.json .thai_gold_signal_state.json .thai_gold_history.csv daily_history.json; do
             [ -f "$f" ] && git add -f "$f" && echo "Added $f" || echo "Skipped $f (not found)"
           done
           git commit -m "Monthly report generated [skip ci]" && git push || echo "Nothing new to commit"

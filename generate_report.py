@@ -269,6 +269,116 @@ def generate_report(output_path: str | None = None):
 
         ws_val.add_chart(chart, "F2")
 
+    # ── Sheet 4: Daily Performance ────────────────────────────────────
+    daily_history_path = BASE_DIR / "daily_history.json"
+    daily_history = []
+    if daily_history_path.exists():
+        with open(daily_history_path) as f:
+            daily_history = json.load(f)
+
+    if daily_history:
+        ws_daily = wb.create_sheet("Daily Performance")
+        ws_daily.sheet_properties.tabColor = "3498DB"
+
+        daily_headers = [
+            "Day", "Date", "Gold Price", "Cash (THB)",
+            "Gold (baht-wt)", "Gold Value (THB)",
+            "Portfolio Value (THB)", "P&L (THB)", "P&L (%)",
+            "Signal", "Buys", "Sells", "Total Trades",
+        ]
+        daily_widths = [6, 14, 16, 18, 14, 18, 20, 18, 10, 10, 8, 8, 12]
+
+        for col_idx, (h, w) in enumerate(zip(daily_headers, daily_widths), 1):
+            c = ws_daily.cell(row=1, column=col_idx, value=h)
+            c.font = header_font
+            c.fill = header_fill
+            c.alignment = Alignment(horizontal="center", vertical="center")
+            c.border = thin_border
+            ws_daily.column_dimensions[get_column_letter(col_idx)].width = w
+
+        green_font = Font(name="Arial", size=10, color="1a6b1a")
+        red_font = Font(name="Arial", size=10, color="CC0000")
+        normal_font = Font(name="Arial", size=10)
+        even_fill = PatternFill("solid", fgColor="F7F9FC")
+
+        for i, day in enumerate(daily_history):
+            row = i + 2
+            fill = even_fill if i % 2 == 0 else PatternFill()
+
+            row_data = [
+                i + 1,
+                day.get("date", ""),
+                day.get("price", 0),
+                day.get("cash", 0),
+                day.get("gold_units", 0),
+                day.get("gold_value", 0),
+                day.get("port_value", 0),
+                day.get("pnl", 0),
+                day.get("pnl_pct", 0) / 100 if day.get("pnl_pct", 0) != 0 else 0,
+                day.get("signal", ""),
+                day.get("buys_today", 0),
+                day.get("sells_today", 0),
+                day.get("total_trades", 0),
+            ]
+
+            for col_idx, val in enumerate(row_data, 1):
+                c = ws_daily.cell(row=row, column=col_idx, value=val)
+                c.font = normal_font
+                c.fill = fill
+                c.border = thin_border
+                c.alignment = Alignment(horizontal="center")
+
+                # Number formats
+                if col_idx in (3, 4, 6, 7):    # prices & currency
+                    c.number_format = currency_fmt
+                elif col_idx == 5:               # gold units
+                    c.number_format = '#,##0.0000'
+                elif col_idx == 8:               # P&L THB
+                    c.number_format = '#,##0.00;(#,##0.00);"-"'
+                    if isinstance(val, (int, float)):
+                        c.font = green_font if val >= 0 else red_font
+                elif col_idx == 9:               # P&L %
+                    c.number_format = pct_fmt
+                    if isinstance(val, (int, float)):
+                        c.font = green_font if val >= 0 else red_font
+
+        # Portfolio Value line chart
+        if len(daily_history) >= 2:
+            chart = LineChart()
+            chart.title = "Daily Portfolio Value"
+            chart.y_axis.title = "THB"
+            chart.x_axis.title = "Date"
+            chart.style = 10
+            chart.width = 28
+            chart.height = 14
+
+            data_ref = Reference(ws_daily, min_col=7, min_row=1,
+                                 max_row=len(daily_history) + 1)
+            cat_ref = Reference(ws_daily, min_col=2, min_row=2,
+                                max_row=len(daily_history) + 1)
+            chart.add_data(data_ref, titles_from_data=True)
+            chart.set_categories(cat_ref)
+            chart.series[0].graphicalProperties.line.width = 25000
+
+            ws_daily.add_chart(chart, "O2")
+
+            # P&L % chart
+            chart2 = LineChart()
+            chart2.title = "Cumulative Return (%)"
+            chart2.y_axis.title = "%"
+            chart2.y_axis.numFmt = '0.00%'
+            chart2.style = 10
+            chart2.width = 28
+            chart2.height = 14
+
+            pnl_ref = Reference(ws_daily, min_col=9, min_row=1,
+                                max_row=len(daily_history) + 1)
+            chart2.add_data(pnl_ref, titles_from_data=True)
+            chart2.set_categories(cat_ref)
+            chart2.series[0].graphicalProperties.line.width = 25000
+
+            ws_daily.add_chart(chart2, "O18")
+
     # ── Save ──────────────────────────────────────────────────────────
     wb.save(output_path)
     print(f"Report saved: {output_path}")
