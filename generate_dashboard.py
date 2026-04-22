@@ -109,6 +109,40 @@ def generate_dashboard():
     color: #64748b;
     font-size: 0.8rem;
   }}
+  .sync-btn {{
+    background: #334155;
+    color: #fbbf24;
+    border: 1px solid #475569;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }}
+  .sync-btn:hover {{ background: #475569; }}
+  .sync-btn:disabled {{ opacity: 0.5; cursor: not-allowed; }}
+  .sync-btn .spinner {{
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #fbbf24;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }}
+  @keyframes spin {{ to {{ transform: rotate(360deg); }} }}
+  .footer {{
+    text-align: center;
+    padding: 24px;
+    color: #475569;
+    font-size: 0.75rem;
+    border-top: 1px solid #1e293b;
+    margin-top: 40px;
+  }}
   .container {{
     max-width: 1200px;
     margin: 0 auto;
@@ -271,7 +305,12 @@ def generate_dashboard():
     <h1>📊 Gold Portfolio Dashboard</h1>
     <div class="period">Forward Test: {test_start} → {test_end}</div>
   </div>
-  <div class="updated">อัปเดตล่าสุด: {now.strftime("%Y-%m-%d %H:%M")} ICT</div>
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div class="updated">อัปเดตล่าสุด: {now.strftime("%Y-%m-%d %H:%M")} ICT</div>
+    <button class="sync-btn" id="syncBtn" onclick="triggerSync()">
+      🔄 Sync & Update
+    </button>
+  </div>
 </div>
 
 <div class="container">
@@ -533,7 +572,21 @@ if (daily.length >= 1) {{
     }}
   }});
 }}
+
+// Sync button — refresh page to get latest data (cache-busting)
+function triggerSync() {{
+  const btn = document.getElementById('syncBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Updating...';
+  // Cache-bust reload to get freshest version from GitHub Pages
+  location.href = location.pathname + '?t=' + Date.now();
+}}
 </script>
+
+<div class="footer">
+  Test by PP | Gold Forward Test {test_start} → {test_end} | Powered by GitHub Actions
+</div>
+
 </body>
 </html>"""
 
