@@ -4,19 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gold Portfolio Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #0f172a;
-    color: #e2e8f0;
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #f8f6f3;
+    color: #4a4543;
     min-height: 100vh;
+    font-weight: 300;
   }
   .header {
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    border-bottom: 1px solid #334155;
-    padding: 20px 24px;
+    background: #fffdf9;
+    border-bottom: 1px solid #e8e4df;
+    padding: 24px 28px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -24,41 +26,42 @@
     gap: 12px;
   }
   .header h1 {
-    font-size: 1.5rem;
-    color: #fbbf24;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: #6b5c4c;
+    letter-spacing: -0.01em;
   }
   .header .period {
-    color: #94a3b8;
-    font-size: 0.85rem;
+    color: #a09890;
+    font-size: 0.8rem;
+    font-weight: 400;
+    margin-top: 2px;
   }
   .updated {
-    color: #64748b;
-    font-size: 0.8rem;
+    color: #b5aea6;
+    font-size: 0.75rem;
   }
   .sync-btn {
-    background: #334155;
-    color: #fbbf24;
-    border: 1px solid #475569;
-    padding: 8px 16px;
-    border-radius: 8px;
+    background: #efe9e1;
+    color: #7a6e62;
+    border: 1px solid #ddd6cd;
+    padding: 7px 14px;
+    border-radius: 20px;
     cursor: pointer;
-    font-size: 0.8rem;
-    font-weight: 600;
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-family: inherit;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     transition: all 0.2s;
   }
-  .sync-btn:hover { background: #475569; }
-  .sync-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .sync-btn:hover { background: #e5ddd4; }
+  .sync-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .sync-btn .spinner {
     display: inline-block;
-    width: 14px;
-    height: 14px;
-    border: 2px solid #fbbf24;
+    width: 12px; height: 12px;
+    border: 1.5px solid #7a6e62;
     border-top-color: transparent;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -66,65 +69,69 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   .footer {
     text-align: center;
-    padding: 24px;
-    color: #475569;
-    font-size: 0.75rem;
-    border-top: 1px solid #1e293b;
+    padding: 28px;
+    color: #c4bdb5;
+    font-size: 0.7rem;
+    letter-spacing: 0.03em;
     margin-top: 40px;
   }
   .container {
-    max-width: 1200px;
+    max-width: 1100px;
     margin: 0 auto;
     padding: 24px;
   }
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
   }
   .card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 12px;
-    padding: 20px;
+    background: #fffdf9;
+    border: 1px solid #e8e4df;
+    border-radius: 14px;
+    padding: 18px;
   }
   .card .label {
-    color: #94a3b8;
-    font-size: 0.8rem;
+    color: #a09890;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
+    font-weight: 500;
     margin-bottom: 8px;
   }
   .card .value {
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #4a4543;
   }
   .card .sub {
-    color: #64748b;
-    font-size: 0.8rem;
+    color: #b5aea6;
+    font-size: 0.75rem;
     margin-top: 4px;
+    font-weight: 400;
   }
-  .green { color: #22c55e; }
-  .red { color: #ef4444; }
-  .gold { color: #fbbf24; }
+  .green { color: #5a9e6f; }
+  .red { color: #c97b7b; }
+  .gold { color: #b8956a; }
   .chart-container {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 12px;
+    background: #fffdf9;
+    border: 1px solid #e8e4df;
+    border-radius: 14px;
     padding: 20px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
   .chart-container h2 {
-    font-size: 1rem;
-    color: #cbd5e1;
-    margin-bottom: 16px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #7a6e62;
+    margin-bottom: 14px;
   }
   .chart-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 24px;
+    gap: 14px;
+    margin-bottom: 20px;
   }
   @media (max-width: 768px) {
     .chart-row { grid-template-columns: 1fr; }
@@ -133,96 +140,104 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
   th {
-    background: #334155;
-    color: #cbd5e1;
+    background: #f0ebe5;
+    color: #7a6e62;
     padding: 10px 12px;
     text-align: center;
-    font-weight: 600;
+    font-weight: 500;
     position: sticky;
     top: 0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
   }
   td {
-    padding: 8px 12px;
+    padding: 9px 12px;
     text-align: center;
-    border-bottom: 1px solid #1e293b;
+    border-bottom: 1px solid #f0ebe5;
+    color: #5c5550;
   }
-  tr:nth-child(even) { background: #1e293b; }
-  tr:nth-child(odd) { background: #0f172a; }
-  .buy-row { background: rgba(34, 197, 94, 0.08) !important; }
-  .sell-row { background: rgba(239, 68, 68, 0.08) !important; }
+  tr:nth-child(even) { background: #faf8f5; }
+  tr:nth-child(odd) { background: #fffdf9; }
+  .buy-row { background: #f3f9f4 !important; }
+  .sell-row { background: #faf3f3 !important; }
   .badge {
     display: inline-block;
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.7rem;
+    letter-spacing: 0.02em;
   }
-  .badge-buy { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
-  .badge-sell { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+  .badge-buy { background: #e4f2e7; color: #5a9e6f; }
+  .badge-sell { background: #f5e5e5; color: #c97b7b; }
   .table-scroll {
     max-height: 400px;
     overflow-y: auto;
-    border-radius: 8px;
-    border: 1px solid #334155;
+    border-radius: 10px;
+    border: 1px solid #e8e4df;
   }
   .tabs {
     display: flex;
-    gap: 4px;
-    margin-bottom: 16px;
+    gap: 6px;
+    margin-bottom: 14px;
   }
   .tab {
-    padding: 8px 20px;
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 8px 8px 0 0;
-    color: #94a3b8;
+    padding: 8px 18px;
+    background: #fffdf9;
+    border: 1px solid #e8e4df;
+    border-radius: 20px;
+    color: #a09890;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 400;
+    font-family: inherit;
     transition: all 0.2s;
   }
   .tab.active {
-    background: #334155;
-    color: #fbbf24;
-    border-bottom-color: #334155;
+    background: #6b5c4c;
+    color: #fffdf9;
+    border-color: #6b5c4c;
   }
   .tab-content { display: none; }
   .tab-content.active { display: block; }
   .stat-row {
     display: flex;
     justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid #1e293b;
+    padding: 9px 0;
+    border-bottom: 1px solid #f0ebe5;
   }
   .stat-row:last-child { border-bottom: none; }
-  .stat-label { color: #94a3b8; }
-  .stat-value { font-weight: 600; }
+  .stat-label { color: #a09890; font-weight: 400; }
+  .stat-value { font-weight: 500; }
   .allocation-bar {
     display: flex;
-    height: 28px;
-    border-radius: 8px;
+    height: 24px;
+    border-radius: 12px;
     overflow: hidden;
-    margin-top: 8px;
+    margin-top: 10px;
   }
   .alloc-cash {
-    background: #3b82f6;
+    background: #b8cfe0;
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
-    font-weight: 600;
+    font-size: 0.65rem;
+    font-weight: 500;
     transition: width 0.5s;
   }
   .alloc-gold {
-    background: #fbbf24;
-    color: #0f172a;
+    background: #dcc6a0;
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
-    font-weight: 600;
+    font-size: 0.65rem;
+    font-weight: 500;
     transition: width 0.5s;
   }
 </style>
@@ -231,53 +246,51 @@
 
 <div class="header">
   <div>
-    <h1>📊 Gold Portfolio Dashboard</h1>
-    <div class="period">Forward Test: 2026-04-18 → 2026-05-15</div>
+    <h1>Gold Portfolio</h1>
+    <div class="period">2026-04-18 — 2026-05-15</div>
   </div>
-  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-    <div class="updated">อัปเดตล่าสุด: 2026-04-22 21:34 ICT</div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <div class="updated">2026-04-22 21:38 ICT</div>
     <button class="sync-btn" id="syncBtn" onclick="triggerSync()">
-      🔄 Sync & Update
+      Sync
     </button>
   </div>
 </div>
 
 <div class="container">
 
-  <!-- Summary Cards -->
   <div class="cards">
     <div class="card">
-      <div class="label">มูลค่าพอร์ต</div>
+      <div class="label">Portfolio Value</div>
       <div class="value gold">496,720.77</div>
-      <div class="sub">เริ่มต้น 500,000 บาท</div>
+      <div class="sub">from 500,000</div>
     </div>
     <div class="card">
-      <div class="label">กำไร/ขาดทุน</div>
-      <div class="value" style="color:#ef4444">-3,279.23</div>
-      <div class="sub" style="color:#ef4444">-0.66%</div>
+      <div class="label">P&L</div>
+      <div class="value" style="color:#c97b7b">-3,279.23</div>
+      <div class="sub" style="color:#c97b7b">-0.66%</div>
     </div>
     <div class="card">
-      <div class="label">ราคาทองปัจจุบัน</div>
+      <div class="label">Gold Price</div>
       <div class="value">72,597.48</div>
-      <div class="sub">บาท/บาททอง</div>
+      <div class="sub">THB / baht-weight</div>
     </div>
     <div class="card">
-      <div class="label">ต้นทุนเฉลี่ย</div>
+      <div class="label">Avg Cost</div>
       <div class="value">0.00</div>
-      <div class="sub">ไม่มีทองคำ</div>
+      <div class="sub">no gold held</div>
     </div>
   </div>
 
-  <!-- Allocation -->
-  <div class="card" style="margin-bottom:24px">
-    <div class="label">สัดส่วนพอร์ต</div>
-    <div style="display:flex;justify-content:space-between;margin-top:8px">
-      <span>เงินสด: 496,720.77 บาท</span>
-      <span class="gold">ทองคำ: 0.00 บาท</span>
+  <div class="card" style="margin-bottom:20px">
+    <div class="label">Allocation</div>
+    <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:0.8rem;color:#7a6e62">
+      <span>Cash: 496,720.77</span>
+      <span>Gold: 0.00</span>
     </div>
     <div class="allocation-bar">
       <div class="alloc-cash" style="width:100%">
-        เงินสด 100%
+        100%
       </div>
       <div class="alloc-gold" style="width:0%">
         
@@ -285,45 +298,42 @@
     </div>
   </div>
 
-  <!-- Stats -->
-  <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))">
+  <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr))">
     <div class="card">
-      <div class="label">สถิติการเทรด</div>
-      <div class="stat-row"><span class="stat-label">รายการทั้งหมด</span><span class="stat-value">8</span></div>
-      <div class="stat-row"><span class="stat-label">คู่ BUY-SELL</span><span class="stat-value">4</span></div>
-      <div class="stat-row"><span class="stat-label">ชนะ / แพ้</span><span class="stat-value"><span class="green">0</span> / <span class="red">4</span></span></div>
-      <div class="stat-row"><span class="stat-label">อัตราชนะ</span><span class="stat-value">0%</span></div>
+      <div class="label">Trade Stats</div>
+      <div class="stat-row"><span class="stat-label">Total trades</span><span class="stat-value">8</span></div>
+      <div class="stat-row"><span class="stat-label">Pairs</span><span class="stat-value">4</span></div>
+      <div class="stat-row"><span class="stat-label">Win / Loss</span><span class="stat-value"><span class="green">0</span> / <span class="red">4</span></span></div>
+      <div class="stat-row"><span class="stat-label">Win rate</span><span class="stat-value">0%</span></div>
     </div>
     <div class="card">
-      <div class="label">กำไร/ขาดทุนจากการเทรด</div>
-      <div class="stat-row"><span class="stat-label">กำไรรวม</span><span class="stat-value green">+0.00</span></div>
-      <div class="stat-row"><span class="stat-label">ขาดทุนรวม</span><span class="stat-value red">-3,279.24</span></div>
-      <div class="stat-row"><span class="stat-label">สุทธิ</span><span class="stat-value" style="color:#ef4444">-3,279.24</span></div>
-      <div class="stat-row"><span class="stat-label">กฎ</span><span class="stat-value" style="font-size:0.75rem;color:#94a3b8">ไม่ขายต่ำกว่าต้นทุน</span></div>
+      <div class="label">Profit / Loss</div>
+      <div class="stat-row"><span class="stat-label">Gross profit</span><span class="stat-value green">+0.00</span></div>
+      <div class="stat-row"><span class="stat-label">Gross loss</span><span class="stat-value red">-3,279.24</span></div>
+      <div class="stat-row"><span class="stat-label">Net</span><span class="stat-value" style="color:#c97b7b">-3,279.24</span></div>
+      <div class="stat-row"><span class="stat-label">Rule</span><span class="stat-value" style="font-size:0.7rem;color:#a09890">No sell below cost</span></div>
     </div>
   </div>
 
-  <!-- Charts -->
   <div class="chart-row">
     <div class="chart-container">
-      <h2>📈 มูลค่าพอร์ตรายวัน</h2>
+      <h2>Portfolio Value</h2>
       <canvas id="valueChart"></canvas>
     </div>
     <div class="chart-container">
-      <h2>📊 ผลตอบแทนสะสม (%)</h2>
+      <h2>Return (%)</h2>
       <canvas id="returnChart"></canvas>
     </div>
   </div>
 
   <div class="chart-container">
-    <h2>🪙 ราคาทองคำ</h2>
+    <h2>Gold Price</h2>
     <canvas id="priceChart"></canvas>
   </div>
 
-  <!-- Tables -->
   <div class="tabs">
-    <div class="tab active" onclick="switchTab('trades')">รายการซื้อขาย (8)</div>
-    <div class="tab" onclick="switchTab('daily')">ผลรายวัน (1)</div>
+    <div class="tab active" onclick="switchTab('trades')">Trades (8)</div>
+    <div class="tab" onclick="switchTab('daily')">Daily (1)</div>
   </div>
 
   <div id="trades-tab" class="tab-content active">
@@ -385,7 +395,7 @@ trades.forEach((t, i) => {
 // Daily table
 const dbody = document.getElementById('daily-body');
 daily.forEach((d, i) => {
-  const pcolor = d.pnl >= 0 ? '#22c55e' : '#ef4444';
+  const pcolor = d.pnl >= 0 ? '#5a9e6f' : '#c97b7b';
   dbody.innerHTML += `<tr>
     <td>${i+1}</td>
     <td>${d.date}</td>
@@ -414,8 +424,8 @@ const chartDefaults = {
   borderColor: '#334155',
 };
 
-Chart.defaults.color = '#94a3b8';
-Chart.defaults.borderColor = '#334155';
+Chart.defaults.color = '#a09890';
+Chart.defaults.borderColor = '#e8e4df';
 
 if (daily.length >= 1) {
   const labels = daily.map(d => d.date.slice(5));
@@ -427,12 +437,13 @@ if (daily.length >= 1) {
       datasets: [{
         label: 'มูลค่าพอร์ต (บาท)',
         data: daily.map(d => d.port_value),
-        borderColor: '#fbbf24',
-        backgroundColor: 'rgba(251, 191, 36, 0.1)',
+        borderColor: '#b8956a',
+        backgroundColor: 'rgba(184, 149, 106, 0.08)',
         fill: true,
-        tension: 0.3,
-        pointRadius: 4,
-        pointBackgroundColor: '#fbbf24',
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: '#b8956a',
+        borderWidth: 2,
       }]
     },
     options: {
@@ -456,12 +467,13 @@ if (daily.length >= 1) {
       datasets: [{
         label: 'ผลตอบแทน (%)',
         data: daily.map(d => d.pnl_pct),
-        borderColor: daily[daily.length-1].pnl_pct >= 0 ? '#22c55e' : '#ef4444',
+        borderColor: daily[daily.length-1].pnl_pct >= 0 ? '#5a9e6f' : '#c97b7b',
         backgroundColor: daily[daily.length-1].pnl_pct >= 0
-          ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
+          ? 'rgba(90,158,111,0.08)' : 'rgba(201,123,123,0.08)',
         fill: true,
-        tension: 0.3,
-        pointRadius: 4,
+        tension: 0.4,
+        pointRadius: 3,
+        borderWidth: 2,
       }]
     },
     options: {
@@ -483,10 +495,11 @@ if (daily.length >= 1) {
       datasets: [{
         label: 'ราคาทอง (บาท/บาททอง)',
         data: daily.map(d => d.price),
-        borderColor: '#f59e0b',
-        tension: 0.3,
-        pointRadius: 4,
-        pointBackgroundColor: '#f59e0b',
+        borderColor: '#c9a96e',
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: '#c9a96e',
+        borderWidth: 2,
       }]
     },
     options: {
