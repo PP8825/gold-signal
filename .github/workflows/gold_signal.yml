@@ -72,8 +72,13 @@ jobs:
           for f in portfolio_state.json trade_log.json .thai_gold_signal_state.json .thai_gold_history.csv daily_history.json docs/index.html; do
             [ -f "$f" ] && git add -f "$f" && echo "Added $f" || echo "Skipped $f (not found)"
           done
-          git diff --cached --stat
-          git commit -m "Update signal state [skip ci]" && git push || echo "Nothing new to commit"
+          git diff --cached --quiet && echo "Nothing new to commit" && exit 0
+          git commit -m "Update signal state [skip ci]"
+          for i in 1 2 3; do
+            git push && break
+            echo "Push failed, retrying ($i/3)..."
+            git pull --rebase
+          done
 
   # ── Daily snapshot (09:00 Bangkok = 02:00 UTC every day) ─────
   daily-snapshot:
@@ -114,8 +119,13 @@ jobs:
           for f in daily_history.json portfolio_state.json docs/index.html; do
             [ -f "$f" ] && git add -f "$f" && echo "Added $f" || echo "Skipped $f (not found)"
           done
-          git diff --cached --stat
-          git commit -m "Daily snapshot [skip ci]" && git push || echo "Nothing new to commit"
+          git diff --cached --quiet && echo "Nothing new to commit" && exit 0
+          git commit -m "Daily snapshot [skip ci]"
+          for i in 1 2 3; do
+            git push && break
+            echo "Push failed, retrying ($i/3)..."
+            git pull --rebase
+          done
 
   # ── Monthly report (sends summary to LINE + saves Excel) ──────
   monthly-report:

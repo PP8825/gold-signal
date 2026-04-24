@@ -86,5 +86,49 @@
     "cash_after": 496720.77,
     "gold_before": 1.0,
     "gold_after": 0.0
+  },
+  {
+    "timestamp": "2026-04-22T18:42:00+07:00",
+    "action": "BUY",
+    "price": 72743.33,
+    "units": 1.0,
+    "value": 72743.33,
+    "cash_before": 496720.77,
+    "cash_after": 423977.43,
+    "gold_before": 0.0,
+    "gold_after": 1.0
+  },
+  {
+    "timestamp": "2026-04-22T22:58:00+07:00",
+    "action": "BUY",
+    "price": 72379.47,
+    "units": 1.0,
+    "value": 72379.47,
+    "cash_before": 423977.43,
+    "cash_after": 351597.96,
+    "gold_before": 1.0,
+    "gold_after": 2.0
+  },
+  {
+    "timestamp": "2026-04-23T02:56:00+07:00",
+    "action": "BUY",
+    "price": 72545.27,
+    "units": 1.0,
+    "value": 72545.27,
+    "cash_before": 351597.96,
+    "cash_after": 279052.69,
+    "gold_before": 2.0,
+    "gold_after": 3.0
+  },
+  {
+    "timestamp": "2026-04-24T00:03:00+07:00",
+    "action": "BUY",
+    "price": 72612.62,
+    "units": 1.0,
+    "value": 72612.62,
+    "cash_before": 279052.69,
+    "cash_after": 206440.07,
+    "gold_before": 3.0,
+    "gold_after": 4.0
   }
 ]
