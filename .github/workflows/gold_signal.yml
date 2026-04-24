@@ -5,8 +5,8 @@ permissions:
 
 on:
   schedule:
-    # Signal check: every 4 hours (UTC)
-    - cron: "0 */4 * * *"
+    # Signal check: every hour (UTC)
+    - cron: "0 * * * *"
     # Daily snapshot: 2:00 UTC = 09:00 Bangkok
     - cron: "0 2 * * *"
     # Monthly report: 18th May 2026 = day 30, then 1st of every month
@@ -31,7 +31,7 @@ jobs:
   signal-check:
     if: >-
       github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'signal'
-      || github.event.schedule == '0 */4 * * *'
+      || github.event.schedule == '0 * * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
