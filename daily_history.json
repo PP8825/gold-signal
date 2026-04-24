@@ -96,5 +96,19 @@
     "sells_today": 0,
     "total_trades": 8,
     "signal": "-"
+  },
+  {
+    "date": "2026-04-25",
+    "price": 72432.18,
+    "cash": 496720.76,
+    "gold_units": 0.0,
+    "gold_value": 0.0,
+    "port_value": 496720.76,
+    "pnl": -3279.24,
+    "pnl_pct": -0.66,
+    "buys_today": 0,
+    "sells_today": 0,
+    "total_trades": 8,
+    "signal": "-"
   }
 ]
