@@ -322,6 +322,9 @@ def generate_dashboard():
   </div>
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <div class="updated">{now.strftime("%Y-%m-%d %H:%M")} ICT</div>
+    <a class="sync-btn" href="https://github.com/PP8825/gold-signal/raw/main/Gold_Forward_Test_Report.xlsx" style="text-decoration:none">
+      Excel
+    </a>
     <button class="sync-btn" id="syncBtn" onclick="triggerSync()">
       Sync
     </button>
