@@ -99,16 +99,16 @@
   },
   {
     "date": "2026-04-25",
-    "price": 72612.62,
-    "cash": 206440.07,
-    "gold_units": 4.0,
-    "gold_value": 290450.48,
-    "port_value": 496890.55,
-    "pnl": -3109.45,
-    "pnl_pct": -0.62,
-    "buys_today": 0,
-    "sells_today": 0,
-    "total_trades": 12,
-    "signal": "-"
+    "price": 72209.2,
+    "cash": 0.0,
+    "gold_units": 6.858916,
+    "gold_value": 495276.87,
+    "port_value": 495276.87,
+    "pnl": -4723.13,
+    "pnl_pct": -0.94,
+    "total_trades": 15,
+    "signal": "\u0e0b\u0e37\u0e49\u0e2d",
+    "buys_today": 3,
+    "sells_today": 0
   }
 ]
