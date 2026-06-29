@@ -1006,5 +1006,19 @@
     "signal": "\u0e0b\u0e37\u0e49\u0e2d",
     "buys_today": 0,
     "sells_today": 0
+  },
+  {
+    "date": "2026-06-29",
+    "price": 64203.97,
+    "cash": 0.0,
+    "gold_units": 6.858916,
+    "gold_value": 440369.65,
+    "port_value": 440369.65,
+    "pnl": -59630.35,
+    "pnl_pct": -11.93,
+    "total_trades": 15,
+    "signal": "\u0e16\u0e37\u0e2d",
+    "buys_today": 0,
+    "sells_today": 0
   }
 ]
